@@ -3,29 +3,30 @@ name: Reusable Workflow
 on:
   workflow_call:
     inputs:
-      Registry:
-        type: string
-        required: true
-      Repo:
-        type: string
-        required: true
-      branch:
-        type: string
-        required: true
-      branchTag:
-        type: string
-        default: ${{ github.sha }} 
       clusterName:
         type: string
         required: true
       resourceGroup:
         type: string
         required: true
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true        
+      AZURE_TENANT_ID:
+        required: true        
+      AZURE_SUBSCRIPTION_ID:
+        required: true        
 
 jobs:
   reusable_workflow_job:
     runs-on: ubuntu-latest
     steps:
+    - name: Azure login
+      uses: azure/login@v1.4.6
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}     
     - name: Set up kubelogin for non-interactive login
       uses: azure/use-kubelogin@v1
       with:
