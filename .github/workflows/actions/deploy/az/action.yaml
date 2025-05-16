@@ -1,0 +1,87 @@
+name: 'Build Docker Image'
+description: 'Build, tag, and push image to Amazon '
+
+inputs:
+  clusterName:
+    description: 'ECS cluster'
+    required: true
+  nameSpace:
+    description: 'Container name'
+    required: true
+  appName:
+    description: 'ECS task definition'
+    required: true
+  imageRepository:
+    description: 'ECS task definition'
+    required: true
+  port:
+    description: 'env for respective environment'
+    required: true
+  replicas:
+    description: 'env for respective environment'
+    required: true
+  memoryLimits:
+    description: 'env for respective environment'
+    required: true
+  CPULimits:
+    description: 'env for respective environment'
+    required: true
+  CPURequests:
+    description: 'env for respective environment'
+    required: true
+  memoryRequests:
+    description: 'env for respective environment'
+    required: true
+  hosts:
+    description: 'env for respective environment'
+    required: true
+  secretName:
+    description: 'env for respective environment'
+    required: true
+  url:
+    description: 'env for respective environment'
+    required: true
+  wildcard:
+    description: 'env for respective environment'
+    default: "false"
+  healthPath:
+    description: 'env for respective environment'
+    required: true
+  healthInitialSeconds:
+    description: 'env for respective environment'
+    default: "120"
+  enableAutoscaling:
+    description: 'env for respective environment'
+    default: "false"
+  protocol:
+    description: 'env for respective environment'
+    default: "HTTP"
+
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Deploy
+      id: deploy_image
+      shell: bash
+      run: |
+        helm repo add plateaumed https://nurdynzo.github.io/helm-chart
+        helm upgrade --install ${{ inputs.appName }} plateaumed/sample-chart \
+        -f secrets.yaml -n ${{ inputs.nameSpace }} \
+        --set nameSpace=${{ inputs.nameSpace }} \
+        --set imageRepository=${{ inputs.imageRepository }} \
+        --set appName=${{ inputs.appName }} \
+        --set service.port=${{ inputs.port }} \
+        --set service.protocol=${{ inputs.protocol }} \
+        --set replicas=${{ inputs.replicas }} \
+        --set resources.CPULimits=${{ inputs.CPULimits }} \
+        --set resources.memoryLimits=${{ inputs.memoryLimits }} \
+        --set resources.CPURequests=${{ inputs.CPURequests }} \
+        --set resources.memoryRequests=${{ inputs.memoryRequests }} \
+        --set hosts.url=${{ inputs.hosts }} \
+        --set hosts.secretName=${{ inputs.secretName }} \
+        --set tls.url=${{ inputs.url }} \
+        --set tls.wildcard=${{ inputs.wildcard }} \
+        --set health.probe.path=${{ inputs.healthPath }} \
+        --set health.probe.initialDelaySeconds=${{ inputs.healthInitialSeconds }} \
+        --set autoscaling.enabled=${{ inputs.enableAutoscaling }}

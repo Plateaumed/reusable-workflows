@@ -1,0 +1,42 @@
+name: Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      Registry:
+        type: string
+        required: true
+      Repo:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      branchTag:
+        type: string
+        default: ${{ github.sha }} 
+      clusterName:
+        type: string
+        required: true
+      resourceGroup:
+        type: string
+        required: true
+
+jobs:
+  reusable_workflow_job:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up kubelogin for non-interactive login
+      uses: azure/use-kubelogin@v1
+      with:
+        kubelogin-version: 'v0.0.25'
+    - name: Get K8s context
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ inputs.resourceGroup }}
+        cluster-name: ${{ inputs.clusterName }}
+        admin: 'false'
+        use-kubelogin: 'true'
+
+
+        
